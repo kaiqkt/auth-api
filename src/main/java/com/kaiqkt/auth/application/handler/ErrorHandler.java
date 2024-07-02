@@ -1,7 +1,7 @@
-package com.kaiqkt.template.application.handler;
+package com.kaiqkt.auth.application.handler;
 
-import com.kaiqkt.template.domain.exceptions.DomainException;
-import com.kaiqkt.template.generated.application.dto.ErrorV1;
+import com.kaiqkt.auth.domain.exceptions.DomainException;
+import com.kaiqkt.auth.generated.application.dto.ErrorV1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
