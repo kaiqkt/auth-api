@@ -1,4 +1,4 @@
-package com.kaiqkt.template.domain.exceptions;
+package com.kaiqkt.auth.domain.exceptions;
 
 import org.springframework.http.HttpStatus;
 
