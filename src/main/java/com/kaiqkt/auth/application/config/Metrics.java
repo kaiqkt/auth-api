@@ -1,4 +1,4 @@
-package com.kaiqkt.template.application.config;
+package com.kaiqkt.auth.application.config;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;

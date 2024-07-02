@@ -1,4 +1,4 @@
-package com.kaiqkt.template;
+package com.kaiqkt.auth;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

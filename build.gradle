@@ -12,6 +12,10 @@ java {
     sourceCompatibility = JavaVersion.VERSION_17
 }
 
+jar {
+    enabled = false
+}
+
 springBoot {
     buildInfo()
 }
@@ -34,8 +38,8 @@ openApiGenerate {
     generatorName.set("spring")
     inputSpec.set("$rootDir/src/main/resources/static/api-docs.yml")
     outputDir.set("$buildDir/generated")
-    apiPackage.set("com.kaiqkt.template.generated.application.controllers")
-    modelPackage.set("com.kaiqkt.template.generated.application.dto")
+    apiPackage.set("com.kaiqkt.auth.generated.application.controllers")
+    modelPackage.set("com.kaiqkt.auth.generated.application.dto")
     skipValidateSpec.set(true)
     configOptions.set([
             dateLibrary           : "java8",
