@@ -1,0 +1,14 @@
+---
+services:
+  template-api:
+    container_name: template-api
+    restart: always
+    build:
+      dockerfile: Dockerfile
+    image: template-api:latest
+    environment:
+      PROFILE: prod
+      JWT_SECRET: world
+      ACCESS_TOKEN: world
+    ports:
+      - "8080:8080"
