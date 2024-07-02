@@ -1,7 +1,7 @@
-package com.kaiqkt.template.application.controllers;
+package com.kaiqkt.auth.application.controllers;
 
-import com.kaiqkt.template.generated.application.controllers.HelloApi;
-import com.kaiqkt.template.generated.application.dto.HelloWorld;
+import com.kaiqkt.auth.generated.application.controllers.HelloApi;
+import com.kaiqkt.auth.generated.application.dto.HelloWorld;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 

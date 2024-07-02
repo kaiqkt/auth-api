@@ -1,11 +1,11 @@
 ---
 services:
-  template-api:
-    container_name: template-api
+  auth-api:
+    container_name: auth-api
     restart: always
     build:
       dockerfile: Dockerfile
-    image: template-api:latest
+    image: auth-api:latest
     environment:
       PROFILE: prod
       JWT_SECRET: world
