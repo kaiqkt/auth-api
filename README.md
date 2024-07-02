@@ -1,4 +1,4 @@
-# Event Platform Api.
+# Auth Api.
 
 ## Description
 

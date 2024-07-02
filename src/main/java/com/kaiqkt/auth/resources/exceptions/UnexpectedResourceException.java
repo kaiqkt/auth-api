@@ -1,4 +1,4 @@
-package com.kaiqkt.template.resources.exceptions;
+package com.kaiqkt.auth.resources.exceptions;
 
 import org.slf4j.LoggerFactory;
 
