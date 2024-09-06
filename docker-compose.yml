@@ -1,14 +1,28 @@
 ---
 services:
-  auth-api:
-    container_name: auth-api
+#  auth-api:
+#    container_name: auth-api
+#    restart: always
+#    build:
+#      dockerfile: Dockerfile
+#    image: auth-api:latest
+#    environment:
+#      PROFILE: prod
+#      JWT_SECRET: world
+#      ACCESS_TOKEN: world
+#    ports:
+#      - "8080:8080"
+  postgres:
+    container_name: postgres-auth
+    image: postgres:latest
     restart: always
-    build:
-      dockerfile: Dockerfile
-    image: auth-api:latest
     environment:
-      PROFILE: prod
-      JWT_SECRET: world
-      ACCESS_TOKEN: world
+      POSTGRES_USER: auth_api
+      POSTGRES_PASSWORD: mypwd
+      POSTGRES_DB: auth_api
     ports:
-      - "8080:8080"
+      - "5432:5432"
+
+volumes:
+  postgres:
+    driver: local

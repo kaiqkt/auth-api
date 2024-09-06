@@ -3,4 +3,4 @@ spring:
   application:
     name: auth-api
   profiles:
-    active: ${PROFILE}
+    active: local

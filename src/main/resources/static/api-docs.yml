@@ -11,38 +11,808 @@ info:
     url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
 
 paths:
-  /hello:
-    get:
+  /user:
+    post:
       tags:
-        - Hello World
-      description: Hello World
-      operationId: helloWorld
+        - user
+      description: Create user
+      operationId: create
+      security:
+        - AccessToken: [ ]
+        - JwtToken: [ ]
+      requestBody:
+        required: true
+        content:
+          application/vnd.kaiqkt_auth_api_user_v1+json:
+            schema:
+              $ref: '#/components/schemas/UserRequestV1'
       responses:
         200:
-          description: Hello World
+          description: User created
           content:
-            application/vnd.kaiqkt_hello_world_v1+json:
+            application/vnd.kaiqkt_auth_api_user_v1+json:
               schema:
-                $ref: '#/components/schemas/HelloWorld'
-
+                $ref: '#/components/schemas/UserResponseV1'
+        400:
+          description: Email already exists, invalid password/email, or invalid first/last name
+          content:
+            application/vnd.kaiqkt_auth_api_user_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+    get:
+      tags:
+        - user
+      description: Get user by token
+      operationId: findByToken
+      security:
+        - JwtToken: [ ]
+      responses:
+        200:
+          description: User found
+          content:
+            application/vnd.kaiqkt_auth_api_user_v1+json:
+              schema:
+                $ref: '#/components/schemas/UserResponseV1'
+        404:
+          description: User not found
+          content:
+            application/vnd.kaiqkt_auth_api_user_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+  /user/all:
+    get:
+      tags:
+        - user
+      description: Get uses by roles/status or all users
+      operationId: findAll
+      security:
+        - JwtToken: [ ]
+      parameters:
+        - in: query
+          name: roles
+          schema:
+            type: array
+          required: false
+        - in: query
+          name: status
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+          required: false
+          description: Optional page number to retrieve
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 20
+          required: false
+          description: Optional page size to retrieve
+        - in: query
+          name: sort
+          schema:
+            type: string
+            default: "ASC"
+          required: false
+          description: Optional sort field to retrieve
+      responses:
+        200:
+          description: User found
+          content:
+            application/vnd.kaiqkt_auth_api_user_v1+json:
+              schema:
+                $ref: '#/components/schemas/PageResponseV1'
+        404:
+          description: User not found
+          content:
+            application/vnd.kaiqkt_auth_api_user_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+  /user/{user_id}:
+    get:
+      tags:
+        - user
+      description: Get user by id
+      operationId: findById
+      security:
+        - AccessToken: [ ]
+        - JwtToken: [ ]
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: User found
+          content:
+            application/vnd.kaiqkt_auth_api_user_v1+json:
+              schema:
+                $ref: '#/components/schemas/UserResponseV1'
+        404:
+          description: User not found
+          content:
+            application/vnd.kaiqkt_auth_api_user_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+  /user/{user_id}/status/{status}:
+    patch:
+      tags:
+        - user
+      description: Update user status
+      operationId: updateStatus
+      security:
+        - JwtToken: [ ]
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: status
+          schema:
+            type: string
+          required: true
+      responses:
+        204:
+          description: User status updated
+  /user/{user_id}/role/{role_id}:
+    patch:
+      tags:
+        - user
+      description: Update user role
+      operationId: updateRole
+      security:
+        - JwtToken: [ ]
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: role_id
+          schema:
+            type: string
+          required: true
+      responses:
+        204:
+          description: User roles updated
+    delete:
+      tags:
+        - user
+      description: Remove user role
+      operationId: removeRole
+      security:
+        - JwtToken: [ ]
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: role_id
+          schema:
+            type: string
+          required: true
+      responses:
+        204:
+          description: User roles updated
+  /authentication:
+    post:
+      tags:
+        - authentication
+      description: Authenticate user
+      operationId: authenticate
+      parameters:
+        - in: header
+          name: User-Agent
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: X-Forwarded-For
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/vnd.kaiqkt_auth_api_authentication_v1+json:
+            schema:
+              $ref: '#/components/schemas/AuthenticationRequestV1'
+      responses:
+        200:
+          description: User authenticated
+          content:
+            application/vnd.kaiqkt_auth_api_authentication_v1+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponseV1'
+        404:
+          description: User not found
+          content:
+            application/vnd.kaiqkt_auth_api_authentication_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+        401:
+          description: Unauthorized
+          content:
+            application/vnd.kaiqkt_auth_api_authentication_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+  /authentication/refresh:
+    post:
+      tags:
+        - authentication
+      description: Refresh user authentication
+      operationId: refresh
+      security:
+        - AccessToken: [ ]
+      requestBody:
+        required: true
+        content:
+          application/vnd.kaiqkt_auth_api_refresh_v1+json:
+            schema:
+              $ref: '#/components/schemas/RefreshAuthenticationV1'
+      responses:
+        204:
+          description: User dont need authentication refresh
+        200:
+          description: User authenticated
+          content:
+            application/vnd.kaiqkt_auth_api_authentication_v1+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponseV1'
+        404:
+          description: User not found
+          content:
+            application/vnd.kaiqkt_auth_api_authentication_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+        401:
+          description: Unauthorized
+          content:
+            application/vnd.kaiqkt_auth_api_authentication_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+  /session/{user_id}:
+    delete:
+      tags:
+        - session
+      description: Revoke user sessions. Revoke all sessions if session_id is not provided, otherwise revoke the specified session.
+      operationId: revokeAll
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: session_id
+          schema:
+            type: string
+          required: false
+          description: Optional session ID to revoke a specific session. If not provided, all sessions are revoked.
+        - in: header
+          name: X-Forwarded-For
+          schema:
+            type: string
+          required: true
+      security:
+        - AccessToken: [ ]
+        - JwtToken: [ ]
+      responses:
+        204:
+          description: Sessions revoked
+        404:
+          description: Sessions not found
+          content:
+            application/vnd.kaiqkt_auth_api_session_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+    get:
+      tags:
+        - session
+      description: Get user sessions
+      operationId: findAll
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+          required: false
+          description: Optional page number to retrieve
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 20
+          required: false
+          description: Optional page size to retrieve
+        - in: query
+          name: sort
+          schema:
+            type: string
+            default: "ASC"
+          required: false
+          description: Optional sort field to retrieve
+      security:
+        - AccessToken: [ ]
+        - JwtToken: [ ]
+      responses:
+        200:
+          description: Sessions found
+          content:
+            application/vnd.kaiqkt_auth_api_session_v1+json:
+              schema:
+                $ref: '#/components/schemas/PageResponseV1'
+        404:
+          description: Sessions not found
+          content:
+            application/vnd.kaiqkt_auth_api_session_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+  /session:
+    delete:
+      tags:
+        - session
+      description: Revoke user sessions. Revoke all sessions if session_id is not provided, otherwise revoke the specified session.
+      operationId: revokeAll
+      parameters:
+        - in: header
+          name: X-Forwarded-For
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: session_id
+          schema:
+            type: string
+          required: false
+          description: Optional session ID to revoke a specific session. If not provided, all sessions are revoked.
+      security:
+        - JwtToken: [ ]
+      responses:
+        204:
+          description: Sessions revoked
+        404:
+          description: Sessions not found
+          content:
+            application/vnd.kaiqkt_auth_api_session_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+    get:
+      tags:
+        - session
+      description: Get user sessions
+      operationId: findAll
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+          required: false
+          description: Optional page number to retrieve
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 20
+          required: false
+          description: Optional page size to retrieve
+        - in: query
+          name: sort
+          schema:
+            type: string
+            default: "ASC"
+          required: false
+          description: Optional sort field to retrieve
+      security:
+        - JwtToken: [ ]
+      responses:
+        200:
+          description: Sessions found
+          content:
+            application/vnd.kaiqkt_auth_api_session_v1+json:
+              schema:
+                $ref: '#/components/schemas/PageResponseV1'
+        404:
+          description: Sessions not found
+          content:
+            application/vnd.kaiqkt_auth_api_session_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+  /session/logout:
+    delete:
+      tags:
+        - session
+      description: Logout user actual session based on the token
+      operationId: revoke
+      parameters:
+        - in: header
+          name: X-Forwarded-For
+          schema:
+            type: string
+          required: true
+      security:
+        - JwtToken: [ ]
+      responses:
+        204:
+          description: Session revoked
+        404:
+          description: Session not found
+          content:
+            application/vnd.kaiqkt_auth_api_session_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+  /role/{name}:
+    post:
+      tags:
+        - role
+      description: Create a role
+      operationId: create
+      security:
+        - JwtToken: [ ]
+      parameters:
+        - in: path
+          name: name
+          schema:
+            type: string
+          required: true
+      responses:
+        204:
+          description: Role created
+    delete:
+      tags:
+        - user
+      description: Delete a role
+      operationId: delete
+      security:
+        - JwtToken: [ ]
+      parameters:
+        - in: path
+          name: name
+          schema:
+            type: string
+          required: true
+      responses:
+        204:
+          description: Role deleted
+        400:
+          description: Invalid operation
+          content:
+            application/vnd.kaiqkt_auth_api_role_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+        404:
+          description: Role not found
+          content:
+            application/vnd.kaiqkt_auth_api_role_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+  /role:
+    get:
+      tags:
+        - role
+      description: Get roles
+      operationId: findAll
+      security:
+        - JwtToken: [ ]
+      responses:
+        200:
+          description: Roles found
+          content:
+            application/vnd.kaiqkt_auth_api_role_v1+json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoleResponseV1'
+        404:
+          description: Roles not found
+          content:
+            application/vnd.kaiqkt_auth_api_role_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+  /credential:
+    get:
+      tags:
+        - credential
+      description: Get credential information by token
+      operationId: findByToken
+      security:
+        - JwtToken: [ ]
+      responses:
+        200:
+          description: Credential found
+          content:
+            application/vnd.kaiqkt_auth_api_credential_v1+json:
+              schema:
+                $ref: '#/components/schemas/CredentialResponseV1'
+        404:
+          description: Credential not found
+          content:
+            application/vnd.kaiqkt_auth_api_credential_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+    patch:
+      tags:
+        - credential
+      description: Change credential
+      operationId: change
+      security:
+        - JwtToken: [ ]
+      requestBody:
+        required: true
+        content:
+          application/vnd.kaiqkt_auth_api_credential_v1+json:
+            schema:
+              $ref: '#/components/schemas/CredentialRequestV1'
+      responses:
+        204:
+          description: Credential updated
+        404:
+          description: Credential not found
+          content:
+            application/vnd.kaiqkt_auth_api_credential_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+  /credential/{user_id}:
+    get:
+      tags:
+        - credential
+      description: Get credential information by user id
+      operationId: findByUserId
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: string
+          required: true
+      security:
+        - JwtToken: [ ]
+      responses:
+        200:
+          description: Credential found
+          content:
+            application/vnd.kaiqkt_auth_api_credential_v1+json:
+              schema:
+                $ref: '#/components/schemas/CredentialResponseV1'
+        404:
+          description: Credential not found
+          content:
+            application/vnd.kaiqkt_auth_api_credential_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
 components:
   schemas:
-    HelloWorld:
+    RefreshAuthenticationV1:
       type: object
       properties:
-        message:
-          type: string
+        user_agent:
+            type: string
+            example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+            x-field-extra-annotation: '@NotNull(message="user agent should be not null")'
+        forwarded_for:
+            type: string
+            example: "127.0.0.1"
+            x-field-extra-annotation: '@NotNull(message="forwarded for should be not null")'
+        access_token:
+            type: string
+            example: "eyJhbGciOi"
+            x-field-extra-annotation: '@NotNull(message="access token should be not null")'
+        refresh_token:
+            type: string
+            example: "eyJhbGciOi"
+            x-field-extra-annotation: '@NotNull(message="refresh token should be not null")'
       required:
-        - message
+        - user_agent
+        - forwarded_for
+        - access_token
+        - refresh_token
+
+    UserRequestV1:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: "John"
+          x-field-extra-annotation: '@NotNull(message="first name should be not null") @Size(max = 255, message = "first name must be between 2 and 14 characters")'
+        last_name:
+          type: string
+          example: "Doe"
+          x-field-extra-annotation: '@NotNull(message="last name should be not null") @Size(min= 1, max = 255, message = "last name must be between 2 and 14 characters")'
+        email:
+          type: string
+          example: "email@auth-api.com"
+          x-field-extra-annotation: '@NotNull(message="email name should be not null") @Email(message = "email must be a valid email address")'
+        password:
+          type: string
+          example: "password"
+          x-field-extra-annotation: '@NotNull(message="password should be not null") @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=]).{8,}$",message = "Password must contain at least one lowercase letter, one uppercase letter, one digit, one special character, and be at least 8 characters long.")'
+      required:
+        - first_name
+        - last_name
+        - email
+        - password
+
+    UserResponseV1:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "01J2N1XP9M1Q4YK2YPMQE78V1D"
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        email:
+          type: string
+          example: "email@auth-api.com"
+        status:
+          type: string
+          example: "ACTIVE"
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleResponseV1'
+        created_at:
+          type: string
+          example: "2021-08-01T00:00:00Z"
+        updated_at:
+          type: string
+          example: "2021-08-01T00:00:00Z"
+      required:
+        - id
+        - first_name
+        - last_name
+        - email
+        - roles
+        - status
+        - created_at
+        - updated_at
+
+    RoleResponseV1:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "01J2N1XP9M1Q4YK2YPMQE78V1D"
+        name:
+          type: string
+          example: "ADMIN"
+        created_at:
+          type: string
+          example: "2021-08-01T00:00:00Z"
+      required:
+        - id
+        - name
+        - created_at
+
+    AuthenticationRequestV1:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "email@auth-api.com"
+        password:
+          type: string
+          example: "password"
+      required:
+        - email
+        - password
+
+    AuthenticationResponseV1:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: "token"
+        refresh_token:
+          type: string
+          example: "token"
+        user_id:
+          type: string
+          example: "01J2N1XP9M1Q4YK2YPMQE78V1D"
+        access_token_expiration:
+          type: string
+          example: "2021-08-01T00:00:00Z"
+      required:
+        - access_token
+        - refresh_token
+        - user_id
+        - access_token_expiration
+
+    SessionResponseV1:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "01J2N1XP9M1Q4YK2YPMQE78V1D"
+        user_id:
+          type: string
+          example: "01J2N1XP9M1Q4YK2YPMQE78V1D"
+        user_agent:
+          type: string
+          example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+        created_by_ip:
+          type: string
+          example: "127.0.0.1"
+        expire_at:
+          type: string
+          example: "2021-08-01T00:00:00Z"
+        created_at:
+          type: string
+          example: "2021-08-01T00:00:00Z"
+        replaced_by:
+          $ref: '#/components/schemas/SessionResponseV1'
+        revoked_by_ip:
+          type: string
+          example: "127.0.0.1"
+        revoked_at:
+          type: string
+          example: "2021-08-01T00:00:00Z"
+      required:
+        - id
+        - user_id
+        - user_agent
+        - created_by_ip
+        - created_at
+        - revoked_by_ip
+        - revoked_at
+        - expire_at
+
+    CredentialResponseV1:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "01J2N1XP9M1Q4YK2YPMQE78V1D"
+        user_id:
+          type: string
+          example: "01J2N1XP9M1Q4YK2YPMQE78V1D"
+        created_at:
+          type: string
+          example: "2021-08-01T00:00:00Z"
+        updated_at:
+          type: string
+          example: "2021-08-01T00:00:00Z"
+      required:
+        - id
+        - user_id
+        - created_at
+        - updated_at
+
+    CredentialRequestV1:
+      type: object
+      properties:
+        password:
+          type: string
+          example: "password"
+          x-field-extra-annotation: '@NotNull(message="password should be not null")'
+        new_password:
+          type: string
+          example: "password"
+          x-field-extra-annotation: '@NotNull(message="password should be not null") @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=]).{8,}$",message = "Password must contain at least one lowercase letter, one uppercase letter, one digit, one special character, and be at least 8 characters long.")'
 
     PageResponseV1:
       type: object
       properties:
-        elements:
-          type: array
-          items:
-            type: object
-          example: ["element1", "element2"]
         total_elements:
           type: integer
           example: 2
@@ -52,6 +822,11 @@ components:
         current_page:
           type: integer
           example: 0
+        elements:
+          type: array
+          items:
+            type: object
+          example: [ "element1", "element2" ]
 
     ErrorV1:
       type: object

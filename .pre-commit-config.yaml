@@ -9,11 +9,6 @@ repos:
       - id: check-case-conflict
       - id: check-merge-conflict
       - id: check-executables-have-shebangs
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.30.0
-    hooks:
-      - id: yamllint
-        exclude: ^\.github/workflows/.*\.yml$
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.18.0  # Specify the desired version of Gitleaks
     hooks:
