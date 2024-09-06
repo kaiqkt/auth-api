@@ -1,11 +1,10 @@
 package com.kaiqkt.auth.application.web.controllers;
 
 import com.kaiqkt.auth.application.web.dto.request.UserRequest;
-import com.kaiqkt.auth.application.web.dto.request.UserResponse;
+import com.kaiqkt.auth.application.web.dto.response.UserResponse;
 import com.kaiqkt.auth.application.web.dto.response.PageResponse;
 import com.kaiqkt.auth.domain.models.User;
 import com.kaiqkt.auth.domain.models.enums.Status;
-import com.kaiqkt.auth.domain.services.RoleService;
 import com.kaiqkt.auth.domain.services.UserService;
 import com.kaiqkt.auth.domain.utils.Constants;
 import com.kaiqkt.auth.generated.application.controllers.UserApi;
@@ -27,7 +26,7 @@ public class UserController implements UserApi {
     private final UserService userService;
 
     @Autowired
-    public UserController(RoleService roleService, UserService userService) {
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 

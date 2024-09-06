@@ -1,6 +1,6 @@
 package com.kaiqkt.auth.application.web.controllers;
 
-import com.kaiqkt.auth.application.web.dto.request.RoleResponse;
+import com.kaiqkt.auth.application.web.dto.response.RoleResponse;
 import com.kaiqkt.auth.domain.services.RoleService;
 import com.kaiqkt.auth.generated.application.controllers.RoleApi;
 import com.kaiqkt.auth.generated.application.dto.RoleResponseV1;
