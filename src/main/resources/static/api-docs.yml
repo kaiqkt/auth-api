@@ -813,11 +813,6 @@ components:
     PageResponseV1:
       type: object
       properties:
-        elements:
-          type: array
-          items:
-            type: object
-          example: [ "element1", "element2" ]
         total_elements:
           type: integer
           example: 2
@@ -827,6 +822,11 @@ components:
         current_page:
           type: integer
           example: 0
+        elements:
+          type: array
+          items:
+            type: object
+          example: [ "element1", "element2" ]
 
     ErrorV1:
       type: object

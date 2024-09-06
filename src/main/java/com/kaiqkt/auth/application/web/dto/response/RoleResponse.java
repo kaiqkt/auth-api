@@ -1,4 +1,4 @@
-package com.kaiqkt.auth.application.web.dto.request;
+package com.kaiqkt.auth.application.web.dto.response;
 
 import com.kaiqkt.auth.domain.models.Role;
 import com.kaiqkt.auth.generated.application.dto.RoleResponseV1;

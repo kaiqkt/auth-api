@@ -13,8 +13,8 @@ public class PageResponse {
         responseV1.setTotalElements((int) page.getTotalElements());
         responseV1.setTotalPages(page.getTotalPages());
         responseV1.setCurrentPage(page.getNumber());
-        List<?> elements = page.getContent().stream().map(mapper).toList();
-        responseV1.setElements(Collections.singletonList(elements));
+        List<Object> elements = page.getContent().stream().map(mapper).map(Object.class::cast).toList();
+        responseV1.setElements(elements);
         return responseV1;
     }
 }
