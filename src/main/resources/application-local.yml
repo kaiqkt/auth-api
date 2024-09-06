@@ -2,6 +2,26 @@
 server:
   port: 8080
 
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  datasource:
+    url: jdbc:postgresql://localhost:5432/auth_api
+    username: auth_api
+    password: mypwd
+  flyway:
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    placeholders:
+      ADMIN_EMAIL: "admin@kt.com"
+      ADMIN_PASSWORD: "$2a$10$wrsD3FKU6Fo8Vy1VBui51O29uSTeHpmYJChaK6bT4CULrx8d9H.tG" # @Admin1234#
+    placeholder-replacement: true
+
+refresh-token-secret: world
+session-expiration: 7
+access-token-expiration: 30
+
 springtools:
   jwt-secret: world
   access-token: world

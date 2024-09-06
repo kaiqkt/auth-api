@@ -1,7 +1,8 @@
-package com.kaiqkt.auth.application.handler;
+package com.kaiqkt.auth.application.web.handler;
 
 import com.kaiqkt.auth.domain.exceptions.DomainException;
 import com.kaiqkt.auth.generated.application.dto.ErrorV1;
+import com.kaiqkt.springtools.security.exceptions.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +25,12 @@ class ErrorHandler extends ResponseEntityExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(ErrorHandler.class);
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request
+    ) {
         Map<String, Object> errors = new HashMap<>();
 
         ex.getBindingResult().getAllErrors().forEach(error -> {
@@ -39,22 +45,27 @@ class ErrorHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorV1> handleInternalException(Exception ex, WebRequest request) {
-        ErrorV1 error = new ErrorV1("INTERNAL_ERROR", ex.getMessage());
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorV1> handleUnauthorizedException(UnauthorizedException ex, WebRequest request) {
+        ErrorV1 error = new ErrorV1(ex.getType().name(), ex.getMessage());
 
-        log.error("Internal error: {}, Request: {}", ex, request.getDescription(false));
+        log(ex, request.getDescription(false));
 
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
-
 
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ErrorV1> handleDomainException(DomainException ex, WebRequest request) {
         ErrorV1 error = new ErrorV1(ex.getType().name(), ex.getType().getMessage());
 
-        log.error("Domain error: {}, Request: {}", ex, request.getDescription(false));
+        log(ex, request.getDescription(false));
 
         return new ResponseEntity<>(error, HttpStatusCode.valueOf(ex.getType().getCode()));
+    }
+
+    private void log(Exception ex, String description) {
+        Logger log = LoggerFactory.getLogger(ErrorHandler.class);
+
+        log.error("Error: {}, Message: {}, Request: {}", ex, ex.getMessage(), description);
     }
 }
