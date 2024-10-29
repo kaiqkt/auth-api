@@ -1,10 +1,10 @@
 package com.kaiqkt.auth.domain.repositories;
 
-import com.kaiqkt.auth.domain.models.Role;
 import com.kaiqkt.auth.domain.models.User;
 import com.kaiqkt.auth.domain.models.enums.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,25 +24,30 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     @Transactional
     @Modifying
-    @Query(value = "INSERT INTO user_roles (user_id, role_id) VALUES (:userId, :roleId)", nativeQuery = true)
-    void addRole(String userId, String roleId);
+    @Query(
+            value = "INSERT INTO user_roles (user_id, role_id) " +
+                    "SELECT :userId, unnest(:roleIds) " +
+                    "WHERE NOT EXISTS ( " +
+                    "    SELECT 1 " +
+                    "    FROM user_roles ur " +
+                    "    WHERE ur.user_id = :userId AND ur.role_id IN (SELECT * FROM unnest(:roleIds)) " +
+                    ")",
+            nativeQuery = true
+    )
+    void addRoles(String userId, String[] roleIds);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE User u SET u.updatedAt = CURRENT_TIMESTAMP WHERE u.id = :userId")
+    void updatedAt(String userId);
 
     @Transactional
     @Modifying
     @Query(value = "DELETE FROM user_roles WHERE user_id = :userId AND role_id = :roleId", nativeQuery = true)
     void removeRole(String userId, String roleId);
 
-    @Transactional
-    @Modifying
-    @Query("UPDATE User u SET u.updatedAt = CURRENT_TIMESTAMP WHERE u.id = :userId")
-    void updateUpdatedAt(String userId);
-
-    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name IN :roles AND u.status = :status")
-    Page<User> findByRolesAndStatus(List<String> roles, Status status, PageRequest pageable);
-
-    @Query("SELECT u FROM User u WHERE u.status = :status")
-    Page<User> findByStatus(Status status, PageRequest pageable);
-
-    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name IN :roles")
-    Page<User> findByRoles(List<String> roles, PageRequest pageable);
+    @Query("SELECT DISTINCT u FROM User u LEFT JOIN u.roles r " +
+            "WHERE (:roles IS NULL OR r.name IN :roles) " +
+            "AND (:status IS NULL OR u.status = :status)")
+    Page<User> findByRolesAndStatus(List<String> roles, Status status, Pageable pageable);
 }

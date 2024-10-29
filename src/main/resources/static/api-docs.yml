@@ -63,7 +63,7 @@ paths:
     get:
       tags:
         - user
-      description: Get uses by roles/status or all users
+      description: Get all users
       operationId: findAll
       security:
         - JwtToken: [ ]
@@ -96,7 +96,7 @@ paths:
           name: sort
           schema:
             type: string
-            default: "ASC"
+            default: "DESC"
           required: false
           description: Optional sort field to retrieve
       responses:
@@ -162,7 +162,7 @@ paths:
       responses:
         204:
           description: User status updated
-  /user/{user_id}/role/{role_id}:
+  /user/{user_id}/role:
     patch:
       tags:
         - user
@@ -176,14 +176,17 @@ paths:
           schema:
             type: string
           required: true
-        - in: path
-          name: role_id
+        - in: query
+          name: roles
           schema:
-            type: string
-          required: true
+            type: array
+            items:
+              type: string
+          required: false
       responses:
         204:
           description: User roles updated
+  /user/{user_id}/role/{role_id}:
     delete:
       tags:
         - user
@@ -282,165 +285,11 @@ paths:
             application/vnd.kaiqkt_auth_api_authentication_v1+json:
               schema:
                 $ref: '#/components/schemas/ErrorV1'
-  /session/{user_id}:
-    delete:
-      tags:
-        - session
-      description: Revoke user sessions. Revoke all sessions if session_id is not provided, otherwise revoke the specified session.
-      operationId: revokeAll
-      parameters:
-        - in: path
-          name: user_id
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: session_id
-          schema:
-            type: string
-          required: false
-          description: Optional session ID to revoke a specific session. If not provided, all sessions are revoked.
-        - in: header
-          name: X-Forwarded-For
-          schema:
-            type: string
-          required: true
-      security:
-        - AccessToken: [ ]
-        - JwtToken: [ ]
-      responses:
-        204:
-          description: Sessions revoked
-        404:
-          description: Sessions not found
-          content:
-            application/vnd.kaiqkt_auth_api_session_v1+json:
-              schema:
-                $ref: '#/components/schemas/ErrorV1'
-    get:
-      tags:
-        - session
-      description: Get user sessions
-      operationId: findAll
-      parameters:
-        - in: path
-          name: user_id
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: page
-          schema:
-            type: integer
-            default: 0
-          required: false
-          description: Optional page number to retrieve
-        - in: query
-          name: size
-          schema:
-            type: integer
-            default: 20
-          required: false
-          description: Optional page size to retrieve
-        - in: query
-          name: sort
-          schema:
-            type: string
-            default: "ASC"
-          required: false
-          description: Optional sort field to retrieve
-      security:
-        - AccessToken: [ ]
-        - JwtToken: [ ]
-      responses:
-        200:
-          description: Sessions found
-          content:
-            application/vnd.kaiqkt_auth_api_session_v1+json:
-              schema:
-                $ref: '#/components/schemas/PageResponseV1'
-        404:
-          description: Sessions not found
-          content:
-            application/vnd.kaiqkt_auth_api_session_v1+json:
-              schema:
-                $ref: '#/components/schemas/ErrorV1'
   /session:
     delete:
       tags:
         - session
-      description: Revoke user sessions. Revoke all sessions if session_id is not provided, otherwise revoke the specified session.
-      operationId: revokeAll
-      parameters:
-        - in: header
-          name: X-Forwarded-For
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: session_id
-          schema:
-            type: string
-          required: false
-          description: Optional session ID to revoke a specific session. If not provided, all sessions are revoked.
-      security:
-        - JwtToken: [ ]
-      responses:
-        204:
-          description: Sessions revoked
-        404:
-          description: Sessions not found
-          content:
-            application/vnd.kaiqkt_auth_api_session_v1+json:
-              schema:
-                $ref: '#/components/schemas/ErrorV1'
-    get:
-      tags:
-        - session
-      description: Get user sessions
-      operationId: findAll
-      parameters:
-        - in: query
-          name: page
-          schema:
-            type: integer
-            default: 0
-          required: false
-          description: Optional page number to retrieve
-        - in: query
-          name: size
-          schema:
-            type: integer
-            default: 20
-          required: false
-          description: Optional page size to retrieve
-        - in: query
-          name: sort
-          schema:
-            type: string
-            default: "ASC"
-          required: false
-          description: Optional sort field to retrieve
-      security:
-        - JwtToken: [ ]
-      responses:
-        200:
-          description: Sessions found
-          content:
-            application/vnd.kaiqkt_auth_api_session_v1+json:
-              schema:
-                $ref: '#/components/schemas/PageResponseV1'
-        404:
-          description: Sessions not found
-          content:
-            application/vnd.kaiqkt_auth_api_session_v1+json:
-              schema:
-                $ref: '#/components/schemas/ErrorV1'
-  /session/logout:
-    delete:
-      tags:
-        - session
-      description: Logout user actual session based on the token
+      description: Revoke user session.
       operationId: revoke
       parameters:
         - in: header
@@ -459,7 +308,125 @@ paths:
             application/vnd.kaiqkt_auth_api_session_v1+json:
               schema:
                 $ref: '#/components/schemas/ErrorV1'
-  /role/{name}:
+    get:
+      tags:
+        - session
+      description: Get user sessions
+      operationId: findAllByToken
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+          required: false
+          description: Optional page number to retrieve
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 20
+          required: false
+          description: Optional page size to retrieve
+        - in: query
+          name: sort
+          schema:
+            type: string
+            default: "DESC"
+          required: false
+          description: Optional sort field to retrieve
+      security:
+        - JwtToken: [ ]
+      responses:
+        200:
+          description: Sessions found
+          content:
+            application/vnd.kaiqkt_auth_api_session_v1+json:
+              schema:
+                $ref: '#/components/schemas/PageResponseV1'
+        404:
+          description: Sessions not found
+          content:
+            application/vnd.kaiqkt_auth_api_session_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+  /session/all:
+    get:
+      tags:
+        - session
+      description: Get user sessions
+      operationId: findAll
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+          required: false
+          description: Optional page number to retrieve
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 20
+          required: false
+          description: Optional page size to retrieve
+        - in: query
+          name: sort
+          schema:
+            type: string
+            default: "DESC"
+          required: false
+          description: Optional sort field to retrieve
+      security:
+        - JwtToken: [ ]
+      responses:
+        200:
+          description: Sessions found
+          content:
+            application/vnd.kaiqkt_auth_api_session_v1+json:
+              schema:
+                $ref: '#/components/schemas/PageResponseV1'
+        404:
+          description: Sessions not found
+          content:
+            application/vnd.kaiqkt_auth_api_session_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+  /session/{session_id}:
+    delete:
+      tags:
+        - session
+      description: Revoke user session.
+      operationId: revoke
+      parameters:
+        - in: path
+          name: session_id
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: X-Forwarded-For
+          schema:
+            type: string
+          required: true
+      security:
+        - JwtToken: [ ]
+      responses:
+        204:
+          description: Session revoked
+        404:
+          description: Session not found
+          content:
+            application/vnd.kaiqkt_auth_api_session_v1+json:
+              schema:
+                $ref: '#/components/schemas/ErrorV1'
+  /role:
     post:
       tags:
         - role
@@ -467,12 +434,12 @@ paths:
       operationId: create
       security:
         - JwtToken: [ ]
-      parameters:
-        - in: path
-          name: name
-          schema:
-            type: string
-          required: true
+      requestBody:
+        required: true
+        content:
+          application/vnd.kaiqkt_auth_api_role_v1+json:
+            schema:
+              $ref: '#/components/schemas/RoleRequestV1'
       responses:
         204:
           description: Role created
@@ -483,12 +450,12 @@ paths:
       operationId: delete
       security:
         - JwtToken: [ ]
-      parameters:
-        - in: path
-          name: name
-          schema:
-            type: string
-          required: true
+      requestBody:
+        required: true
+        content:
+          application/vnd.kaiqkt_auth_api_role_v1+json:
+            schema:
+              $ref: '#/components/schemas/DeleteRolesRequestV1'
       responses:
         204:
           description: Role deleted
@@ -504,12 +471,39 @@ paths:
             application/vnd.kaiqkt_auth_api_role_v1+json:
               schema:
                 $ref: '#/components/schemas/ErrorV1'
-  /role:
     get:
       tags:
         - role
       description: Get roles
       operationId: findAll
+      parameters:
+       - in: query
+         name: param
+         schema:
+           type: string
+         required: false
+         description: Optional name or id to retrieve
+       - in: query
+         name: page
+         schema:
+           type: integer
+           default: 0
+         required: false
+         description: Optional page number to retrieve
+       - in: query
+         name: size
+         schema:
+           type: integer
+           default: 20
+         required: false
+         description: Optional page size to retrieve
+       - in: query
+         name: sort
+         schema:
+           type: string
+           default: "DESC"
+         required: false
+         description: Optional sort field to retrieve
       security:
         - JwtToken: [ ]
       responses:
@@ -518,9 +512,7 @@ paths:
           content:
             application/vnd.kaiqkt_auth_api_role_v1+json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RoleResponseV1'
+                $ref: '#/components/schemas/PageResponseV1'
         404:
           description: Roles not found
           content:
@@ -599,6 +591,29 @@ paths:
                 $ref: '#/components/schemas/ErrorV1'
 components:
   schemas:
+    DeleteRolesRequestV1:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+      required:
+        - ids
+
+    RoleRequestV1:
+      type: object
+      properties:
+          name:
+            type: string
+            example: "ADMIN"
+            x-field-extra-annotation: '@NotNull(message="name should be not null") @Size(min= 1, max = 255, message = "name must be between 2 and 14 characters")'
+          description:
+            type: string
+            example: "Administrator"
+      required:
+          - name
+
     RefreshAuthenticationV1:
       type: object
       properties:
@@ -696,12 +711,16 @@ components:
         name:
           type: string
           example: "ADMIN"
+        description:
+          type: string
+          example: "Administrator"
         created_at:
           type: string
           example: "2021-08-01T00:00:00Z"
       required:
         - id
         - name
+        - description
         - created_at
 
     AuthenticationRequestV1:
