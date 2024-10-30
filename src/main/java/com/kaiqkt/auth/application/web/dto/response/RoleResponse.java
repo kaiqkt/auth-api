@@ -9,6 +9,7 @@ public class RoleResponse {
         return new RoleResponseV1(
                 role.getId(),
                 role.getName(),
+                role.getDescription(),
                 role.getCreatedAt().toString()
         );
     }

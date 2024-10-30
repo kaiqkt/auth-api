@@ -43,14 +43,14 @@ public class SessionService {
         return session;
     }
 
-    public void revokeAll(String userId, String ip) {
-        sessionRepository.updateSessionsByUserId(userId, ip);
-        log.info("Revoked all sessions of user {} successfully", userId);
-    }
-
-    public void revokeById(String userId, String sessionId, String ip) {
+    public void revoke(String userId, String sessionId, String ip) {
         sessionRepository.updateByUserIdAndId(userId, sessionId, ip);
         log.info("Revoked session {} of user {} successfully", sessionId, userId);
+    }
+
+    public void revokeById(String sessionId, String ip) {
+        sessionRepository.updateById(sessionId, ip);
+        log.info("Revoked session {} successfully", sessionId);
     }
 
     public void replace(String userId, String sessionId, Session newSessionId) {
@@ -58,12 +58,16 @@ public class SessionService {
         log.info("Replaced session {} of user {} to session {} successfully", sessionId, userId, newSessionId);
     }
 
-    public Page<Session> findAllActive(String userId, Integer page, Integer size, String sort) {
-        return sessionRepository.findActiveSessions(userId, Pageable.getPageRequest(page, size, sort));
+    public Page<Session> findAllByUserId(String userId, Integer page, Integer size, String sort) {
+        return sessionRepository.findAllByUserId(userId, Pageable.getPageRequest(page, size, sort));
     }
 
-    public Page<Session> findAll(String userId, Integer page, Integer size, String sort) {
-        return sessionRepository.findAllByUserId(userId, Pageable.getPageRequest(page, size, sort));
+    public Page<Session> findAll(String id, Integer page, Integer size, String sort) {
+        if (id == null || id.isEmpty()) {
+            return sessionRepository.findAll(Pageable.getPageRequest(page, size, sort));
+        }
+
+        return sessionRepository.findAllBySessionIdOrUserId(id, Pageable.getPageRequest(page, size, sort));
     }
 
     public Session findByIdAndRefreshToken(String sessionId, String refreshToken) throws DomainException {

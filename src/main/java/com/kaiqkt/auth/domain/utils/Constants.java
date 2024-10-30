@@ -1,5 +1,7 @@
 package com.kaiqkt.auth.domain.utils;
 
+import java.util.List;
+
 public class Constants {
     public static final String USER_ROLE_ID = "01J2MXW00K7X30XXAK7JB45PGY";
     public static final String SESSION_ID_KEY = "session_id";
@@ -7,4 +9,5 @@ public class Constants {
     public static final Integer DEFAULT_PAGE = 0;
     public static final Integer DEFAULT_PAGE_SIZE = 20;
     public static final String DEFAULT_SORT_PROPERTY = "createdAt";
+    public static final List<String> DEFAULT_ROLES = List.of("ROLE_USER", "ROLE_ADMIN");
 }
