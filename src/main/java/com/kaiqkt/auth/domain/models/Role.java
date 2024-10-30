@@ -14,12 +14,14 @@ public class Role {
     private String id;
 
     private String name;
+    private String description;
     private LocalDateTime createdAt;
 
     public Role() {
     }
 
-    public Role(String name) {
+    public Role(String name, String description) {
+        this.description = description;
         this.id = ULID.random();
         this.name = name;
         this.createdAt = LocalDateTime.now();
@@ -49,11 +51,20 @@ public class Role {
         this.createdAt = createdAt;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public String toString() {
         return "Role{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
     }

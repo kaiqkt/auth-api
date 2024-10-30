@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS role (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
+    description TEXT,
     created_at TIMESTAMP NOT NULL
     );
 
@@ -60,8 +61,8 @@ CREATE INDEX idx_credential_user_id ON credential(user_id);
 CREATE INDEX idx_session_user_id ON session(user_id);
 CREATE INDEX idx_verification_user_id ON verification(user_id);
 
-INSERT INTO role (id, name, created_at) VALUES ('01J2MXVHQCARKGCJ0ZQ2YRD1PR', 'ROLE_ADMIN', NOW());
-INSERT INTO role (id, name, created_at) VALUES ('01J2MXW00K7X30XXAK7JB45PGY', 'ROLE_USER', NOW());
+INSERT INTO role (id, name, description, created_at) VALUES ('01J2MXVHQCARKGCJ0ZQ2YRD1PR', 'ROLE_ADMIN', 'Administrator with full access', NOW());
+INSERT INTO role (id, name, description, created_at) VALUES ('01J2MXW00K7X30XXAK7JB45PGY', 'ROLE_USER', 'Standard user with limited access', NOW());
 
 INSERT INTO user_auth (id, first_name, last_name, email, status, created_at, updated_at) VALUES
     ('01J2N1XP9M1Q4YK2YPMQE78V1E', 'Admin', null, '${ADMIN_EMAIL}', 'ACTIVE', NOW(), null);
