@@ -71,8 +71,8 @@ public class UserController implements UserApi {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Override
-    public ResponseEntity<Void> updateRole(String userId, String roleId) throws Exception {
-        userService.updateRole(userId, roleId);
+    public ResponseEntity<Void> updateRole(String userId, List<String> roles) throws Exception {
+        userService.updateRoles(userId, roles);
         return ResponseEntity.noContent().build();
     }
 

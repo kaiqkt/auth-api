@@ -14,8 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
-
 @RestController
 public class SessionController implements SessionApi {
 
@@ -26,56 +24,36 @@ public class SessionController implements SessionApi {
         this.sessionService = sessionService;
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @SuppressWarnings("unchecked")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     @Override
-    public ResponseEntity<Void> revokeAll(String userId, String xForwardedFor, String sessionId) throws Exception {
-        Optional.ofNullable(sessionId)
-                .ifPresentOrElse(
-                        id -> sessionService.revokeById(userId, id, xForwardedFor),
-                        () -> sessionService.revokeAll(userId, xForwardedFor)
-                );
+    public ResponseEntity<PageResponseV1> findAllByToken(Integer page, Integer size, String sort) throws Exception {
+        Page<Session> sessions = sessionService.findAllByUserId(Context.getValue(Constants.USER_ID_KEY, String.class), page, size, sort);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(PageResponse.toResponse(sessions, SessionResponse::toResponse));
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @SuppressWarnings("unchecked")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @Override
-    public ResponseEntity<PageResponseV1> findAll(String userId, Integer page, Integer size, String sort) throws Exception {
-        Page<Session> sessions = sessionService.findAll(userId, page, size, sort);
+    public ResponseEntity<PageResponseV1> findAll(String id, Integer page, Integer size, String sort) throws Exception {
+        Page<Session> sessions = sessionService.findAll(id, page, size, sort);
 
         return ResponseEntity.ok(PageResponse.toResponse(sessions, SessionResponse::toResponse));
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     @Override
-    public ResponseEntity<PageResponseV1> findAll(Integer page, Integer size, String sort) throws Exception {
-        String userId = Context.getValue(Constants.USER_ID_KEY, String.class);
-        Page<Session> sessions = sessionService.findAllActive(userId, page, size, sort);
-
-        return ResponseEntity.ok(PageResponse.toResponse(sessions, SessionResponse::toResponse));
-    }
-
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    @Override
-    public ResponseEntity<Void> revokeAll(String xForwardedFor, String sessionId) throws Exception {
-        String userId = Context.getValue(Constants.USER_ID_KEY, String.class);
-
-        Optional.ofNullable(sessionId)
-                .ifPresentOrElse(
-                        id -> sessionService.revokeById(userId, id, xForwardedFor),
-                        () -> sessionService.revokeAll(userId, xForwardedFor)
-                );
+    public ResponseEntity<Void> revoke(String xForwardedFor) {
+        sessionService.revoke(Context.getValue(Constants.USER_ID_KEY, String.class), Context.getValue(Constants.SESSION_ID_KEY, String.class), xForwardedFor);
 
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @Override
-    public ResponseEntity<Void> revoke(String xForwardedFor) throws Exception {
-        String userId = Context.getValue(Constants.USER_ID_KEY, String.class);
-        String sessionId = Context.getValue(Constants.SESSION_ID_KEY, String.class);
-
-        sessionService.revokeById(userId, sessionId, xForwardedFor);
+    public ResponseEntity<Void> revoke(String sessionId, String xForwardedFor) throws Exception {
+        sessionService.revokeById(sessionId, xForwardedFor);
 
         return ResponseEntity.noContent().build();
     }

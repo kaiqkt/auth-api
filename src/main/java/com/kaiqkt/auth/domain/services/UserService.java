@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -32,12 +33,13 @@ public class UserService {
         this.roleService = roleService;
     }
 
+    @Transactional
     public void create(User user, String password) throws Exception {
-        Role role = roleService.findById(Constants.USER_ROLE_ID);
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new DomainException(ErrorType.EMAIL_ALREADY_IN_USE);
         }
 
+        Role role = roleService.findById(Constants.USER_ROLE_ID);
         user.setRoles(List.of(role));
 
         userRepository.save(user);
@@ -50,18 +52,9 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(() -> new DomainException(ErrorType.USER_NOT_FOUND));
     }
 
-    public Page<User> findAll(
-            List<String> roles,
-            Status status,
-            Integer page,
-            Integer size,
-            String sort
-    ) {
+    public Page<User> findAll(List<String> roles, Status status, Integer page, Integer size, String sort) {
         PageRequest pageRequest = Pageable.getPageRequest(page, size, sort);
-        if (roles != null && !roles.isEmpty()) {
-            return status != null ? userRepository.findByRolesAndStatus(roles, status, pageRequest) : userRepository.findByRoles(roles, pageRequest);
-        }
-        return status != null ? userRepository.findByStatus(status, pageRequest) : userRepository.findAll(pageRequest);
+        return userRepository.findByRolesAndStatus(roles, status, pageRequest);
     }
 
     public void updateStatus(String id, Status status) throws DomainException {
@@ -69,21 +62,26 @@ public class UserService {
         log.info("User {} status updated to {} successfully", id, status);
     }
 
-    public void updateRole(String id, String roleId) throws DomainException {
-        Role role = roleService.findById(roleId);
+    @Transactional
+    public void updateRoles(String id, List<String> rolesId) throws DomainException {
+        List<Role> roles = roleService.findByIds(rolesId);
         User user = findById(id);
 
-        userRepository.addRole(user.getId(), role.getId());
-        userRepository.updateUpdatedAt(user.getId());
-        log.info("Added role {} to user {} successfully", role.getName(), user.getId());
+        userRepository.addRoles(user.getId(), roles.stream().map(Role::getId).toArray(String[]::new));
+        userRepository.updatedAt(user.getId());
+
+        log.info("Added roles {} to user {} successfully", roles.stream().map(Role::getName).toList(), user.getId());
+
     }
 
+    @Transactional
     public void removeRole(String id, String roleId) throws DomainException {
         Role role = roleService.findById(roleId);
         User user = findById(id);
 
         userRepository.removeRole(user.getId(), role.getId());
-        userRepository.updateUpdatedAt(user.getId());
+        userRepository.updatedAt(user.getId());
+
         log.info("Removed role {} from user {} successfully", role.getName(), user.getId());
     }
 }
