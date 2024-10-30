@@ -63,10 +63,6 @@ public class SessionService {
     }
 
     public Page<Session> findAll(String id, Integer page, Integer size, String sort) {
-        if (id == null || id.isEmpty()) {
-            return sessionRepository.findAll(Pageable.getPageRequest(page, size, sort));
-        }
-
         return sessionRepository.findAllBySessionIdOrUserId(id, Pageable.getPageRequest(page, size, sort));
     }
 

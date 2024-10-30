@@ -18,6 +18,6 @@ public interface RoleRepository extends JpaRepository<Role, String> {
     @Modifying
     @Query("DELETE FROM Role r WHERE r.id IN :ids")
     void deleteByIds(List<String> ids);
-    @Query("SELECT r FROM Role r WHERE r.id = :searchTerm OR LOWER(r.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+    @Query("SELECT r FROM Role r WHERE :searchTerm IS NULL OR r.id = :searchTerm OR LOWER(r.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     Page<Role> findByIdOrNameContainingIgnoreCase(String searchTerm, Pageable pageable);
 }
