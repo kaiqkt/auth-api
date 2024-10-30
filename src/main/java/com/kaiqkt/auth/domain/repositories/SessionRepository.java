@@ -32,7 +32,7 @@ public interface SessionRepository extends JpaRepository<Session, String> {
     @Query("SELECT s FROM Session s WHERE s.user.id = :userId AND s.revokedAt IS NULL AND s.expireAt > CURRENT_TIMESTAMP AND s.replacedBy IS NULL")
     Page<Session> findAllByUserId(String userId, Pageable pageRequest);
 
-    @Query("SELECT s FROM Session s WHERE s.id = :id OR s.user.id = :id")
+    @Query("SELECT s FROM Session s WHERE :id IS NULL OR s.id = :id OR s.user.id = :id")
     Page<Session> findAllBySessionIdOrUserId(String id, Pageable pageable);
 
     @Query("SELECT s FROM Session s WHERE s.id = :id AND s.refreshToken = :refreshToken AND s.revokedAt IS NULL AND s.expireAt > CURRENT_TIMESTAMP AND s.replacedBy IS NULL")
